@@ -87,7 +87,8 @@ def create_vm():
 @bp.route("/", methods=["GET"])
 def list_vms():
     # list all vms
-    org_name = current_app.config=["PULUMI_ORG"]
+    vms = []
+    org_name = current_app.config["PULUMI_ORG"]
     project_name = current_app.config["PROJECT_NAME"]
     try:
         ws = auto.LocalWorkspace(
