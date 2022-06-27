@@ -6,22 +6,24 @@ import os
 from pathlib import Path
 
 bp = Blueprint("virtual_machines", __name__, url_prefix="/vms")
-instance_types = ['c5.xlarge', 'p2.xlarge', 'p3.2xlarge']
+instance_types = ['t2.micro', 't3.micro']
 
-def create_pulumi_program(keydata: str, instance_type= str):
-    # Choose lastest minimal amzn2 Linux AMI
-    # TODO - Make it something the user can select
+def create_pulumi_program(keydata: str, instance_type=str):
+    # Choose the latest minimal amzn2 Linux AMI.
+    # TODO: Make this something the user can choose.
+    ami = aws.ec2.get_ami(most_recent=True,
+                          owners=["amazon"],
+                          filters=[aws.GetAmiFilterArgs(name="name", values=["*amzn2-ami-minimal-hvm*"])])
 
-    ami = aws.ec2.SecurityGroup(
-        'web-secgrp',
-        description='Enable SSH access',
-        ingress=[aws.ec2.SecurityGroupIngressArgs(
-            protocol='tcp',
-            from_port=22,
-            to_port=22,
-            cidr_blocks=['0.0.0.0/0']
-        )]
-    )
+    group = aws.ec2.SecurityGroup('web-secgrp',
+                                  description='Enable SSH access',
+                                  ingress=[aws.ec2.SecurityGroupIngressArgs(
+                                      protocol='tcp',
+                                      from_port=22,
+                                      to_port=22,
+                                      cidr_blocks=['0.0.0.0/0'],
+                                  )])
+
     
     public_key = keydata
     if public_key is None or public_key == "":
@@ -56,7 +58,7 @@ def create_vm():
     if request.method == "POST":
         stack_name = request.form.get("vm-id")
         keydata = request.form.get("vm-keypair")
-        instance_type = request.form.get("intance_type")
+        instance_type = request.form.get("instance_type")
 
         def pulumi_program():
             return create_pulumi_program(keydata, instance_type)
