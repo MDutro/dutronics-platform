@@ -1,0 +1,1 @@
+To run: FLASK_RUN_PORT=1337 FLASK_ENV=development FLASK_APP=app.py PULUMI_ORG=[your-org-name] venv/bin/flask run
